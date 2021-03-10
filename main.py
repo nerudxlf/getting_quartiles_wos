@@ -1,4 +1,6 @@
 import pandas as pd
+import re
+from collections import Counter
 
 
 def get_result(q_only: object, data: object) -> object:
@@ -17,16 +19,27 @@ def count_n(q: object) -> object:
     author_list = q["Addresses"].to_list()
     n_list = []
     for item in author_list:
-        n1, n2 = 0, 0
+        total = 0
+        omstu_list = []
+        all_list = []
         item_split = item.split("[")[1:]
         for elem in item_split:
             if elem.find("Omsk State Tech Univ") != -1:
                 elem_split = elem.split("]")
-                n1 += len(elem_split[0].split(';'))
+                for i in elem_split[0].split(';'):
+                    i = re.sub(r'[^A-Za-z]', '', i)
+                    omstu_list.append(i)
+                    all_list.append(i)
             else:
                 elem_split = elem.split("]")
-                n2 += len(elem_split[0].split(';'))
-        n = n1 / (n1 + n2)
+                for i in elem_split[0].split(';'):
+                    i = re.sub(r'[^A-Za-z]', '', i)
+                    all_list.append(i)
+        all_dict = dict(Counter(all_list))
+        n2 = len(all_dict.keys())
+        for elem in omstu_list:
+            total += 1 / all_dict[elem]
+        n = total / n2
         n_list.append(n)
     q["N"] = n_list
     return q
